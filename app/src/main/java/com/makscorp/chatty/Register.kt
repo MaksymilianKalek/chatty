@@ -52,7 +52,6 @@ class Register : AppCompatActivity() {
                     val intent = Intent(this@Register, MainActivity::class.java);
                     finish()
                     startActivity(intent)
-
                 } else {
                     Toast.makeText(this@Register, "Some error", Toast.LENGTH_SHORT).show()
                 }

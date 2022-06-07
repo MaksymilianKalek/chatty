@@ -6,4 +6,6 @@
     <string name="register">Register</string>
     <string name="email">Email</string>
     <string name="log_out">Log out</string>
+    <string name="last_message_was_sent_from">Last message was sent from:</string>
+    <string name="type_a_message">Type a message</string>
 </resources>
