@@ -52,8 +52,7 @@ class ChatActivity : AppCompatActivity() {
         coordinateTxt = findViewById(R.id.coordinates)
         messageList = ArrayList()
         messageAdapter = MessageAdapter(this, messageList)
-        db =
-            FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
+        db = FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
 
         messageRecyclerView.layoutManager = LinearLayoutManager(this)
         messageRecyclerView.adapter = messageAdapter
@@ -107,8 +106,10 @@ class ChatActivity : AppCompatActivity() {
                         val message = postSnapshot.getValue(Message::class.java)
                         messageList.add(message!!)
                     }
-                    val latestMessage = messageList.last()
-                    coordinateTxt.text = "Lat: ${latestMessage.latitude} Long: ${latestMessage.longitude}"
+                    if (messageList.isNotEmpty()) {
+                        val latestMessage = messageList.last()
+                        coordinateTxt.text = "Lat: ${latestMessage.latitude} Long: ${latestMessage.longitude}"
+                    }
                     messageAdapter.notifyDataSetChanged()
                 }
 
