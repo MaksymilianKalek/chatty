@@ -7,6 +7,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 class Register : AppCompatActivity() {
 
@@ -14,14 +18,16 @@ class Register : AppCompatActivity() {
     private lateinit var edtEmail: EditText
     private lateinit var edtPassword: EditText
     private lateinit var btnRegister: Button
-
-    private lateinit var mAuth: FirebaseAuth
+    private lateinit var db: DatabaseReference
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        mAuth = FirebaseAuth.getInstance()
+        supportActionBar?.hide()
+
+        auth = FirebaseAuth.getInstance()
 
         edtUsername = findViewById(R.id.usernameInput)
         edtEmail = findViewById(R.id.emailInput)
@@ -29,29 +35,32 @@ class Register : AppCompatActivity() {
         btnRegister = findViewById(R.id.registerBtn)
 
         btnRegister.setOnClickListener {
+            val username = edtUsername.text.toString()
             val email = edtEmail.text.toString()
             val password = edtPassword.text.toString()
 
-            register(email, password)
+            register(username, email, password)
 
         }
     }
 
-    private fun register(email: String, password: String) {
-        mAuth.createUserWithEmailAndPassword(email, password)
+    private fun register(username: String, email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
-                println("TEST")
-                println(task.exception?.message)
-                println(task.result.toString())
                 if (task.isSuccessful) {
-                    println("TEST1")
+                    addUserToDb(username, email, auth.currentUser?.uid!!)
                     startActivity(Intent(this@Register, MainActivity::class.java))
 
                 } else {
-                    println("TES2")
                     Toast.makeText(this@Register, "Some error", Toast.LENGTH_SHORT).show()
                 }
             }
     }
+
+    private fun addUserToDb(username: String, email: String, uid: String) {
+        db = FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
+        db.child("users").child(uid).setValue(User(username, email, uid))
+    }
+
 
 }

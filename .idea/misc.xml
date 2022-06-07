@@ -4,7 +4,9 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/maksk/AndroidStudioProjects/Chatty/app/src/main/res/layout/activity_login.xml" value="0.2672239108409321" />
+        <entry key="..\:/Users/maksk/AndroidStudioProjects/Chatty/app/src/main/res/layout/activity_main.xml" value="0.31145833333333334" />
         <entry key="..\:/Users/maksk/AndroidStudioProjects/Chatty/app/src/main/res/layout/activity_register.xml" value="0.33" />
+        <entry key="..\:/Users/maksk/AndroidStudioProjects/Chatty/app/src/main/res/layout/user_layout.xml" value="0.25" />
       </map>
     </option>
   </component>

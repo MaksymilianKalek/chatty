@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "513822016297",
+    "firebase_url": "https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "chatty-400fc",
     "storage_bucket": "chatty-400fc.appspot.com"
   },
