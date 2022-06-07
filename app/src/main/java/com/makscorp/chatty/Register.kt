@@ -49,7 +49,9 @@ class Register : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     addUserToDb(username, email, auth.currentUser?.uid!!)
-                    startActivity(Intent(this@Register, MainActivity::class.java))
+                    val intent = Intent(this@Register, MainActivity::class.java);
+                    finish()
+                    startActivity(intent)
 
                 } else {
                     Toast.makeText(this@Register, "Some error", Toast.LENGTH_SHORT).show()
