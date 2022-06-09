@@ -10,10 +10,18 @@
         android:id="@+id/userRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/user_layout"/>
+        tools:listitem="@layout/user_layout" />
+
+
+    <ImageView
+        android:id="@+id/downWave"
+        android:layout_width="match_parent"
+        android:layout_height="423dp"
+        android:layout_marginTop="-16dp"
+        android:layout_marginBottom="-206dp"
+        android:layout_alignParentBottom="true"
+        android:contentDescription="@string/logo"
+        android:src="@drawable/down_wave"
+        />
 
 </RelativeLayout>

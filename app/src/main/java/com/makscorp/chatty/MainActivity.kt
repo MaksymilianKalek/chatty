@@ -1,6 +1,8 @@
 package com.makscorp.chatty
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -41,7 +43,7 @@ class MainActivity : AppCompatActivity() {
                         userList.add(currentUser!!)
                     }
                 }
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemInserted(userList.lastIndex)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -56,8 +58,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         if (item.itemId == R.id.logout) {
+            val sharedPref: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
+            sharedPref.edit().clear().apply()
             auth.signOut()
             val intent = Intent(this@MainActivity, Login::class.java)
             finish()

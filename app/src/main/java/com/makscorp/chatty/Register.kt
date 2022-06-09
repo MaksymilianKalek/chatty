@@ -1,16 +1,14 @@
 package com.makscorp.chatty
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 
 class Register : AppCompatActivity() {
 
@@ -39,8 +37,23 @@ class Register : AppCompatActivity() {
             val email = edtEmail.text.toString()
             val password = edtPassword.text.toString()
 
-            register(username, email, password)
-
+            if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+                if (password.length >= 8) {
+                    register(username, email, password)
+                } else {
+                    Toast.makeText(
+                        this@Register,
+                        "Your password needs to be at least 8 characters long",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                Toast.makeText(
+                    this@Register,
+                    "You need to fill all of the text fields",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
@@ -49,17 +62,19 @@ class Register : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     addUserToDb(username, email, auth.currentUser?.uid!!)
-                    val intent = Intent(this@Register, MainActivity::class.java);
+                    val intent = Intent(this@Register, MainActivity::class.java)
                     finish()
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this@Register, "Some error", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@Register, "Server error occurred", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
     }
 
     private fun addUserToDb(username: String, email: String, uid: String) {
-        db = FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
+        db =
+            FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
         db.child("users").child(uid).setValue(User(username, email, uid))
     }
 

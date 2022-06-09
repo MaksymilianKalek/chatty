@@ -2,13 +2,11 @@ package com.makscorp.chatty
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,11 +21,13 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var sendBtn: ImageView
     private lateinit var messageAdapter: MessageAdapter
     private lateinit var messageList: ArrayList<Message>
-    private lateinit var coordinateTxt: TextView
     private lateinit var db: DatabaseReference
     private lateinit var locationManager: LocationManager
+    private lateinit var senderUid: String
     private var locationRefreshTime: Long = 15000 // 15 seconds to update
     private var locationRefreshDistance: Float = 10f // 500 meters to update
+    private var longitude = .0
+    private var latitude = .0
 
     private var receiverRoom: String? = null
     private var senderRoom: String? = null
@@ -36,11 +36,31 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
+        initializeVariables()
+        updateLocation()
+
+        listenForKeyboardOpen()
+        listenForMessageSent()
+        listenForMessageReceived()
+    }
+
+    private fun listenForKeyboardOpen() {
+        messageRecyclerView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+            if (bottom < oldBottom) {
+                messageRecyclerView.post {
+                    if (messageList.isNotEmpty()) {
+                        messageRecyclerView.smoothScrollToPosition(messageAdapter.itemCount - 1)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initializeVariables() {
         val username = intent.getStringExtra("username")
         val receiverUid = intent.getStringExtra("uid")
 
-        val senderUid = FirebaseAuth.getInstance().currentUser?.uid
-
+        senderUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
 
@@ -49,25 +69,58 @@ class ChatActivity : AppCompatActivity() {
         messageRecyclerView = findViewById(R.id.chatRecyclerView)
         messageInput = findViewById(R.id.messageTxt)
         sendBtn = findViewById(R.id.sendBtn)
-        coordinateTxt = findViewById(R.id.coordinates)
         messageList = ArrayList()
         messageAdapter = MessageAdapter(this, messageList)
-        db = FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
+        db =
+            FirebaseDatabase.getInstance("https://chatty-400fc-default-rtdb.europe-west1.firebasedatabase.app").reference
 
         messageRecyclerView.layoutManager = LinearLayoutManager(this)
         messageRecyclerView.adapter = messageAdapter
+    }
 
+    private fun listenForMessageSent() {
+        sendBtn.setOnClickListener {
+            val message = messageInput.text.toString().trim()
+            if (message.isNotEmpty()) {
+                val messageObj = Message(message, senderUid, latitude, longitude)
 
+                db.child("chats").child(senderRoom!!).child("messages").push().setValue(messageObj)
+                    .addOnSuccessListener {
+                        db.child("chats").child(receiverRoom!!).child("messages").push()
+                            .setValue(messageObj)
+                    }
+                messageInput.setText("")
+            }
+        }
+    }
+
+    private fun listenForMessageReceived() {
+        db.child("chats").child(senderRoom!!).child("messages")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    messageList.clear()
+                    for (postSnapshot in snapshot.children) {
+                        val message = postSnapshot.getValue(Message::class.java)
+                        messageList.add(message!!)
+                    }
+                    messageAdapter.notifyItemInserted(messageList.lastIndex)
+                    if (messageList.isNotEmpty()) {
+                        messageRecyclerView.smoothScrollToPosition(messageAdapter.itemCount - 1)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+            })
+    }
+
+    private fun updateLocation() {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
 
-        var longitude: Double = .0
-        var latitude: Double = .0
-
-        val mLocationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                longitude = location.longitude
-                latitude = location.latitude
-            }
+        val mLocationListener = LocationListener { location ->
+            longitude = location.longitude
+            latitude = location.latitude
         }
 
         if (ActivityCompat.checkSelfPermission(
@@ -96,39 +149,6 @@ class ChatActivity : AppCompatActivity() {
                 ),
                 1337
             )
-        }
-
-        db.child("chats").child(senderRoom!!).child("messages")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    messageList.clear()
-                    for (postSnapshot in snapshot.children) {
-                        val message = postSnapshot.getValue(Message::class.java)
-                        messageList.add(message!!)
-                    }
-                    if (messageList.isNotEmpty()) {
-                        val latestMessage = messageList.last()
-                        coordinateTxt.text = "Lat: ${latestMessage.latitude} Long: ${latestMessage.longitude}"
-                    }
-                    messageAdapter.notifyDataSetChanged()
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-
-                }
-
-            })
-
-        sendBtn.setOnClickListener {
-            val message = messageInput.text.toString()
-            val messageObj = Message(message, senderUid, latitude, longitude)
-
-            db.child("chats").child(senderRoom!!).child("messages").push().setValue(messageObj)
-                .addOnSuccessListener {
-                    db.child("chats").child(receiverRoom!!).child("messages").push()
-                        .setValue(messageObj)
-                }
-            messageInput.setText("")
         }
     }
 }

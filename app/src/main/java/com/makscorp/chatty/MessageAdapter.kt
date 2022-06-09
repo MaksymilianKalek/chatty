@@ -1,35 +1,38 @@
 package com.makscorp.chatty
 
 import android.content.Context
+import android.location.Geocoder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import java.util.*
 
-class MessageAdapter(val ctx: Context, val messageList: ArrayList<Message>) :
+class MessageAdapter(private val ctx: Context, private val messageList: ArrayList<Message>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val itemReceived = 1
     private val itemSent = 2
 
     class SentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val sent: TextView = itemView.findViewById<TextView>(R.id.sentMessageTxt)
+        val sent: TextView = itemView.findViewById(R.id.sentMessageTxt)
+        val coordinatesSent: TextView = itemView.findViewById(R.id.coordinatesSentTxt)
     }
 
     class ReceivedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val received = itemView.findViewById<TextView>(R.id.receivedMessageTxt)
+        val received: TextView = itemView.findViewById(R.id.receivedMessageTxt)
+        val coordinatesReceived: TextView = itemView.findViewById(R.id.coordinatesReceivedTxt)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-
-        if (viewType == 1) {
-            return MessageAdapter.ReceivedViewHolder(
+        return if (viewType == 1) {
+            ReceivedViewHolder(
                 LayoutInflater.from(ctx).inflate(R.layout.received, parent, false)
             )
         } else {
-            return MessageAdapter.SentViewHolder(
+            SentViewHolder(
                 LayoutInflater.from(ctx).inflate(R.layout.sent, parent, false)
             )
         }
@@ -38,22 +41,37 @@ class MessageAdapter(val ctx: Context, val messageList: ArrayList<Message>) :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val currentMessage = messageList[position]
+        var location = ""
+        try {
+            val geo = Geocoder(ctx, Locale.getDefault())
+            val addresses =
+                geo.getFromLocation(currentMessage.latitude!!, currentMessage.longitude!!, 1)
+            if (addresses.isNotEmpty()) {
+                val address = addresses.first()
+                location =
+                    "${address.thoroughfare ?: ""} ${address.subThoroughfare ?: ""}, ${address.postalCode} ${address.locality},  ${address.countryCode}"
+            }
+        } catch (e: Exception) {
+            println(e)
+        }
+
         if (holder.javaClass == SentViewHolder::class.java) {
-            val viewHolder = holder as SentViewHolder
+            holder as SentViewHolder
             holder.sent.text = currentMessage.message
+            holder.coordinatesSent.text = location
         } else {
-            val viewHolder = holder as ReceivedViewHolder
+            holder as ReceivedViewHolder
             holder.received.text = currentMessage.message
+            holder.coordinatesReceived.text = location
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-
         val currentMessage = messageList[position]
-        if (FirebaseAuth.getInstance().currentUser?.uid.equals(currentMessage.senderId)) {
-            return itemSent
+        return if (FirebaseAuth.getInstance().currentUser?.uid.equals(currentMessage.senderId)) {
+            itemSent
         } else {
-            return itemReceived
+            itemReceived
         }
     }
 

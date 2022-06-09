@@ -12,7 +12,7 @@ class UserAdapter(private val ctx: Context, private val userList: ArrayList<User
     RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val txtUsername = itemView.findViewById<TextView>(R.id.txt_username)
+        val txtUsername: TextView = itemView.findViewById(R.id.txt_username)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {

@@ -11,16 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/linearLayout"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:paddingTop="10dp" />
 
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:text="@string/last_message_was_sent_from"
-        android:layout_above="@id/coordinates"
-        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/coordinates"
@@ -31,13 +24,13 @@
         android:textSize="15sp" />
 
 
-
-
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:weightSum="100"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
 
@@ -45,15 +38,22 @@
             android:id="@+id/messageTxt"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_marginStart="15dp"
+            android:layout_marginStart="10dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:hint="@string/type_a_message"
-            android:layout_weight="90" />
+            android:layout_weight="90"
+            android:autofillHints=""
+            android:background="@drawable/input_border"
+            android:inputType="text" />
         <ImageView
             android:id="@+id/sendBtn"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/send_button"
-            android:layout_weight="10"/>
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/send"
+            android:layout_weight="10"
+            android:contentDescription="send" />
 
     </LinearLayout>
 </RelativeLayout>

@@ -1,11 +1,13 @@
 package com.makscorp.chatty
 
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class Login : AppCompatActivity() {
@@ -31,6 +33,13 @@ class Login : AppCompatActivity() {
         btnLogin = findViewById(R.id.loginBtn)
         btnRegister = findViewById(R.id.registerBtn)
 
+        val sharedPref: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
+        val savedEmail = sharedPref.getString("email", "")!!
+        val savedPassword = sharedPref.getString("password", "")!!
+        if (savedEmail.isNotEmpty() && savedPassword.isNotEmpty()) {
+            login(savedEmail, savedPassword)
+        }
+
         btnRegister.setOnClickListener {
             val intent = Intent(this, Register::class.java)
             startActivity(intent)
@@ -47,11 +56,14 @@ class Login : AppCompatActivity() {
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    val sharedPref: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
+                    sharedPref.edit().remove("email").remove("password").putString("email", email).putString("password", password).apply()
                     val intent = Intent(this@Login, MainActivity::class.java)
                     finish()
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this@Login, "Incorrect user or password", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@Login, "Incorrect user or password", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
     }
