@@ -33,7 +33,7 @@ class Login : AppCompatActivity() {
         btnLogin = findViewById(R.id.loginBtn)
         btnRegister = findViewById(R.id.registerBtn)
 
-        val sharedPref: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
+        val sharedPref: SharedPreferences = this.getSharedPreferences("private", Context.MODE_PRIVATE)
         val savedEmail = sharedPref.getString("email", "")!!
         val savedPassword = sharedPref.getString("password", "")!!
         if (savedEmail.isNotEmpty() && savedPassword.isNotEmpty()) {
@@ -56,8 +56,8 @@ class Login : AppCompatActivity() {
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val sharedPref: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
-                    sharedPref.edit().remove("email").remove("password").putString("email", email).putString("password", password).apply()
+                    val sharedPref: SharedPreferences = this.getSharedPreferences("private", Context.MODE_PRIVATE)
+                    sharedPref.edit().putString("email", email).putString("password", password).apply()
                     val intent = Intent(this@Login, MainActivity::class.java)
                     finish()
                     startActivity(intent)

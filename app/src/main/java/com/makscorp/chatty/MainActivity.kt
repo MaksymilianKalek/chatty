@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.logout) {
-            val sharedPref: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
+            val sharedPref: SharedPreferences = this.getSharedPreferences("private", Context.MODE_PRIVATE)
             sharedPref.edit().clear().apply()
             auth.signOut()
             val intent = Intent(this@MainActivity, Login::class.java)
