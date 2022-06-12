@@ -41,6 +41,20 @@ class MessageAdapter(private val ctx: Context, private val messageList: ArrayLis
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val currentMessage = messageList[position]
+        if (currentMessage.location?.isEmpty() == true) {
+            try {
+                val geo = Geocoder(ctx, Locale.getDefault())
+                val addresses =
+                    geo.getFromLocation(currentMessage.latitude!!, currentMessage.longitude!!, 1)
+                if (addresses.isNotEmpty()) {
+                    val address = addresses.first()
+                    currentMessage.location =
+                        "${address.thoroughfare ?: ""} ${address.subThoroughfare ?: ""}, ${address.postalCode} ${address.locality},  ${address.countryCode}"
+                }
+            } catch (e: Exception) {
+                currentMessage.location = "${String.format("%.6f", currentMessage.latitude)}, ${String.format("%.6f", currentMessage.longitude)}"
+            }
+        }
 
         if (holder.javaClass == SentViewHolder::class.java) {
             holder as SentViewHolder

@@ -110,7 +110,7 @@ class ChatActivity : AppCompatActivity() {
                     println(e)
                 }
             }
-            val messageObj = Message(message, senderUid, location)
+            val messageObj = Message(message, senderUid, location, latitude, longitude)
 
             db.child("chats").child(senderRoom!!).child("messages").push().setValue(messageObj)
                 .addOnSuccessListener {
