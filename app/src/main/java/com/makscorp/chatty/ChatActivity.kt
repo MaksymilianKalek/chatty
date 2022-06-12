@@ -6,7 +6,6 @@ import android.location.Geocoder
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import android.os.Handler
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -97,17 +96,19 @@ class ChatActivity : AppCompatActivity() {
         val message = messageInput.text.toString().trim()
         var location = ""
         if (message.isNotEmpty()) {
-            try {
-                val geo = Geocoder(this, Locale.getDefault())
-                val addresses =
-                    geo.getFromLocation(latitude, longitude, 1)
-                if (addresses.isNotEmpty()) {
-                    val address = addresses.first()
-                    location =
-                        "${address.thoroughfare ?: ""} ${address.subThoroughfare ?: ""}, ${address.postalCode} ${address.locality},  ${address.countryCode}"
+            if (latitude != .0 || longitude != .0) {
+                try {
+                    val geo = Geocoder(this, Locale.getDefault())
+                    val addresses =
+                        geo.getFromLocation(latitude, longitude, 1)
+                    if (addresses.isNotEmpty()) {
+                        val address = addresses.first()
+                        location =
+                            "${address.thoroughfare ?: ""} ${address.subThoroughfare ?: ""}, ${address.postalCode} ${address.locality},  ${address.countryCode}"
+                    }
+                } catch (e: Exception) {
+                    println(e)
                 }
-            } catch (e: Exception) {
-                println(e)
             }
             val messageObj = Message(message, senderUid, location)
 
