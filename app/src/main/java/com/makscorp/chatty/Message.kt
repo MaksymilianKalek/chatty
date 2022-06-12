@@ -3,17 +3,16 @@ package com.makscorp.chatty
 class Message {
     var message: String? = null
     var senderId: String? = null
-    var latitude: Double? = null
-    var longitude: Double? = null
+    var location: String? = null
 
     constructor() {
 
     }
 
-    constructor(message: String?, senderId: String?, latitude: Double?, longitude: Double?) {
+    constructor(message: String?, senderId: String?, location: String?) {
         this.message = message
         this.senderId = senderId
-        this.latitude = latitude
-        this.longitude = longitude
+        this.location = location
     }
+
 }

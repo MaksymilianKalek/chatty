@@ -2,9 +2,11 @@ package com.makscorp.chatty
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.Handler
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.util.*
+import java.util.concurrent.Executor
 
 class ChatActivity : AppCompatActivity() {
 
@@ -24,10 +28,11 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var db: DatabaseReference
     private lateinit var locationManager: LocationManager
     private lateinit var senderUid: String
-    private var locationRefreshTime: Long = 15000 // 15 seconds to update
+    private var locationRefreshTime: Long = 5000 // 5 seconds to update
     private var locationRefreshDistance: Float = 10f // 500 meters to update
     private var longitude = .0
     private var latitude = .0
+    private lateinit var executor: Executor
 
     private var receiverRoom: String? = null
     private var senderRoom: String? = null
@@ -76,21 +81,42 @@ class ChatActivity : AppCompatActivity() {
 
         messageRecyclerView.layoutManager = LinearLayoutManager(this)
         messageRecyclerView.adapter = messageAdapter
+
+        executor = Executor { sendMessage() }
     }
 
     private fun listenForMessageSent() {
         sendBtn.setOnClickListener {
-            val message = messageInput.text.toString().trim()
-            if (message.isNotEmpty()) {
-                val messageObj = Message(message, senderUid, latitude, longitude)
-
-                db.child("chats").child(senderRoom!!).child("messages").push().setValue(messageObj)
-                    .addOnSuccessListener {
-                        db.child("chats").child(receiverRoom!!).child("messages").push()
-                            .setValue(messageObj)
-                    }
-                messageInput.setText("")
+            executor.execute {
+                sendMessage()
             }
+        }
+    }
+
+    private fun sendMessage() {
+        val message = messageInput.text.toString().trim()
+        var location = ""
+        if (message.isNotEmpty()) {
+            try {
+                val geo = Geocoder(this, Locale.getDefault())
+                val addresses =
+                    geo.getFromLocation(latitude, longitude, 1)
+                if (addresses.isNotEmpty()) {
+                    val address = addresses.first()
+                    location =
+                        "${address.thoroughfare ?: ""} ${address.subThoroughfare ?: ""}, ${address.postalCode} ${address.locality},  ${address.countryCode}"
+                }
+            } catch (e: Exception) {
+                println(e)
+            }
+            val messageObj = Message(message, senderUid, location)
+
+            db.child("chats").child(senderRoom!!).child("messages").push().setValue(messageObj)
+                .addOnSuccessListener {
+                    db.child("chats").child(receiverRoom!!).child("messages").push()
+                        .setValue(messageObj)
+                }
+            messageInput.setText("")
         }
     }
 
