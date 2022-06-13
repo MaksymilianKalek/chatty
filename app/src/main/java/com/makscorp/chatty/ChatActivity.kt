@@ -27,7 +27,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var db: DatabaseReference
     private lateinit var locationManager: LocationManager
     private lateinit var senderUid: String
-    private var locationRefreshTime: Long = 5000 // 5 seconds to update
+    private var locationRefreshTime: Long = 15000 // 5 seconds to update
     private var locationRefreshDistance: Float = 10f // 500 meters to update
     private var longitude = .0
     private var latitude = .0
